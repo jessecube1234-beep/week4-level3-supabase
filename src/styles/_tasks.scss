@@ -1,0 +1,170 @@
+/**
+ * Task-specific styles: new task form, task list, items.
+ */
+
+@use "./variables" as *;
+
+/**
+ * New task form: input + button inline.
+ */
+.new-task-form {
+  display: flex;
+  gap: $space-sm;
+  align-items: center;
+  margin-bottom: $space-md;
+
+  input[type="text"] {
+    flex: 1;
+    padding: $space-sm $space-md;
+    border-radius: $radius-md;
+    border: 1px solid $color-border-soft;
+    background-color: $color-surface-soft;
+    color: $color-text-main;
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-accent;
+      box-shadow: 0 0 0 2px $color-accent-soft;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  button[type="submit"] {
+    min-width: 96px;
+    padding: $space-sm $space-md;
+    border-radius: $radius-md;
+    border: none;
+    background-color: $color-accent;
+    color: #0b1120;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease-out,
+      transform 0.05s ease-out,
+      box-shadow 0.15s ease-out;
+    box-shadow: 0 8px 20px rgb(34, 197, 94, 0.35);
+
+    &:hover {
+      background-color: lighten($color-accent, 3%);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgb(34, 197, 94, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+/**
+ * Task list container.
+ */
+.task-list {
+  list-style: none;
+  margin: $space-md 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-xs;
+}
+
+/**
+ * Task item: flex row with checkbox, title, delete button.
+ */
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-sm;
+  padding: $space-sm $space-md;
+  border-radius: $radius-md;
+  background-color: rgb(15, 23, 42, 0.75);
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease-out,
+    border-color 0.15s ease-out;
+
+  &:hover {
+    background-color: rgb(15, 23, 42, 0.95);
+    border-color: $color-border-soft;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    flex: 1;
+  }
+
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    accent-color: $color-accent;
+  }
+
+  &__title {
+    font-size: 0.95rem;
+    color: $color-text-main;
+    transition: color 0.15s ease-out;
+
+    &--done {
+      text-decoration: line-through;
+      color: $color-text-muted;
+    }
+  }
+
+  &__delete {
+    border: none;
+    background: transparent;
+    color: $color-text-muted;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: $space-xs;
+    border-radius: 999px;
+    transition:
+      background-color 0.15s ease-out,
+      color 0.15s ease-out,
+      transform 0.05s ease-out;
+
+    &:hover {
+      background-color: rgb(239, 68, 68, 0.12);
+      color: #fecaca;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+/**
+ * Small badge-like summary row you may want to add later
+ * (e.g., "3 tasks · 1 completed").
+ */
+.task-summary {
+  margin-top: $space-sm;
+  font-size: 0.85rem;
+  color: $color-text-muted;
+
+  strong {
+    color: $color-text-main;
+  }
+}

@@ -31,5 +31,9 @@ module.exports = {
 
     // Skip scss/no-global-function-names
     "scss/no-global-function-names": null,
+
+    //Allow RGBA
+    "color-function-notation": "legacy",
+    //
   }
 };

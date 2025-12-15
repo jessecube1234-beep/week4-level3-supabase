@@ -1,0 +1,29 @@
+/**
+ * Design tokens for the Supabase Tasks app.
+ * Centralizes colors, fonts, radii and shadows.
+ */
+
+$color-bg: #020617;
+$color-surface: #0b1220;
+$color-surface-soft: #020617;
+$color-border-soft: rgb(148, 163, 184, 0.25);
+
+$color-accent: #22c55e;
+$color-accent-soft: rgb(34, 197, 94, 0.15);
+
+$color-text-main: #e5e7eb;
+$color-text-muted: #9ca3af;
+$color-danger: #f97373;
+
+$radius-md: 0.75rem;
+$radius-lg: 1rem;
+
+$shadow-soft: 0 18px 40px rgb(0, 0, 0, 0.55);
+
+$font-main: system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif;
+
+$space-xs: 0.25rem;
+$space-sm: 0.5rem;
+$space-md: 0.75rem;
+$space-lg: 1rem;
+$space-xl: 1.5rem;
