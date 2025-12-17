@@ -24,3 +24,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * The anon key is public and used from the browser, protected by RLS policies.:contentReference[oaicite:15]{index=15}
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+
+

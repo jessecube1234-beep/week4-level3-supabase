@@ -1,191 +1,136 @@
-import { supabase } from "../../lib/supabaseClient";
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
+import Spinner from 'react-bootstrap/Spinner';
 import TaskItem from "./TaskItem.jsx";
 import NewTaskForm from "./NewTaskForm.jsx";
+import { useTasks } from "../../hooks/useTasks.js";
 
 /**
- * TaskList component
+ * TaskList (Day 4):
+ *  - Uses the custom useTasks hook for all Supabase interactions.
+ *  - Manages filter state (All / Active / Completed).
+ *  - Delegates add / toggle / delete actions to the hook.
+ *  - Displays loading, error and summary information.
  */
 function TaskList() {
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [filter, setFilter] = useState("all"); // "all" | "active" | "completed"
+  const [filter, setFilter] = useState("all"); // "all" | "active" | "completed"
 
-    /**
-     * Loads tasks from the Supabase "tasks" table.
-     */
-    const loadTasks = async () => {
-        setLoading(true);
-        setError(null);
+  const { 
+    tasks,
+    loading,
+    error,
+    addTask,
+    toggleTask,
+    deleteTask
+  } = useTasks();
 
-        const { data, error } = await supabase
-            .from("tasks")
-            .select("*")
-            .order("created_at", { ascending: false });
+  /**
+   * Adds a new task by inserting it into Supabase and updating local state.
+   *
+   * @param {string} title - Title of the new task.
+   */
+  const handleAddTask = async (title) => {
+    addTask(title);
+  };
 
-        if (error) {
-            setError("Failed to load tasks.");
-            console.error(error);
-        } else {
-            setTasks(data || []);
-        }
+  /**
+   * Toggles the is_complete flag of a task both in Supabase and local state.
+   *
+   * @param {number} id - Task ID.
+   * @param {boolean} isComplete - Desired completion state.
+   */
+  const handleToggleComplete = async (id, isComplete) => {
+    toggleTask(id, isComplete);
+  };
 
-        setLoading(false);
-    };
+  /**
+   * Deletes a task by id from Supabase and local state.
+   *
+   * @param {number} id - Task ID.
+   */
+  const handleDeleteTask = async (id) => {
+    deleteTask(id);
+  };
 
-    /**
-     * Adds a new task by inserting it into Supabase and updating local state.
-     *
-     * @param {string} title - Title of the new task.
-     */
-    const handleAddTask = async (title) => {
-        const { data, error } = await supabase
-            .from("tasks")
-            .insert([{ title }])
-            .select();
+  // Derived summary information based on current tasks.
+  // useMemo is for values
+  // useCallback is for functions
+  const totalTasks = useMemo(() => tasks.length, [tasks]);
+  const completedTasks = useMemo(() => tasks.filter((task) => task.is_complete).length, [tasks]);
 
-        if (error) {
-            // Re-throw so NewTaskForm can display the error.
-            throw error;
-        }
+  // Derived filtered list based on current filter state.
+  const visibleTasks = useMemo(() => tasks.filter((task) => {
+    if (filter === "active") return !task.is_complete;
+    if (filter === "completed") return task.is_complete;
+    return true;
+  }), [tasks, filter]);
 
-        const insertedTask = data?.[0];
-        if (insertedTask) {
-            // Prepend the new task to the existing list.
-            setTasks((prev) => [insertedTask, ...prev]);
-        }
-    };
+  return (
+    <section className="card">
+      <h2 className="color-white">Tasks</h2>
 
-    /**
-     * Toggles the is_complete flag of a task both in Supabase and local state.
-     *
-     * @param {number} id - Task ID.
-     * @param {boolean} isComplete - Desired completion state.
-     */
-    const handleToggleComplete = async (id, isComplete) => {
-        const { error } = await supabase
-            .from("tasks")
-            .update({ is_complete: isComplete })
-            .eq("id", id);
+      <NewTaskForm onAddTask={handleAddTask} />
 
-        if (error) {
-            console.error(error);
-            alert("Failed to update task.");
-            return;
-        }
+      {/* Filter controls */}
+      <div style={{ marginBottom: "0.75rem", fontSize: "0.9rem" }}>
+        <span style={{ marginRight: "0.5rem" }}>Filter:</span>
+        <button
+          type="button"
+          onClick={() => setFilter("all")}
+          style={{
+            marginRight: "0.25rem",
+            fontWeight: filter === "all" ? "600" : "400"
+          }}
+        >
+          All
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilter("active")}
+          style={{
+            marginRight: "0.25rem",
+            fontWeight: filter === "active" ? "600" : "400"
+          }}
+        >
+          Active
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilter("completed")}
+          style={{
+            fontWeight: filter === "completed" ? "600" : "400"
+          }}
+        >
+          Completed
+        </button>
+      </div>
 
-        setTasks((prev) =>
-            prev.map((task) =>
-                task.id === id ? { ...task, is_complete: isComplete } : task
-            )
-        );
-    };
+      {error && <p className="error-text">{error}</p>}
 
-    /**
-     * Deletes a task by id from Supabase and local state.
-     *
-     * @param {number} id - Task ID.
-     */
-    const handleDeleteTask = async (id) => {
-        const confirmDelete = window.confirm("Delete this task?");
-        if (!confirmDelete) return;
+      {!loading && !error && tasks.length === 0 && <p>No tasks yet.</p>}
 
-        const { error } = await supabase.from("tasks").delete().eq("id", id);
-
-        if (error) {
-            console.error(error);
-            alert("Failed to delete task.");
-            return;
-        }
-
-        setTasks((prev) => prev.filter((task) => task.id !== id));
-    };
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            await loadTasks();
-        };
-
-        fetchTasks();
-    }, []);
-
-    // Derived summary information based on current tasks.
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter((task) => task.is_complete).length;
-
-    // Derived filtered list based on current filter state.
-    const visibleTasks = tasks.filter((task) => {
-        if (filter === "active") return !task.is_complete;
-        if (filter === "completed") return task.is_complete;
-        return true;
-    });
-
-    return (
-        <section className="card">
-            <h2>Tasks</h2>
-
-            <NewTaskForm onAddTask={handleAddTask} />
-
-            {/* Filter controls */}
-            <div style={{ marginBottom: "0.75rem", fontSize: "0.9rem" }}>
-                <span style={{ marginRight: "0.5rem" }}>Filter:</span>
-                <button
-                    type="button"
-                    onClick={() => setFilter("all")}
-                    style={{
-                        marginRight: "0.25rem",
-                        fontWeight: filter === "all" ? "600" : "400"
-                    }}
-                >
-                    All
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setFilter("active")}
-                    style={{
-                        marginRight: "0.25rem",
-                        fontWeight: filter === "active" ? "600" : "400"
-                    }}
-                >
-                    Active
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setFilter("completed")}
-                    style={{
-                        fontWeight: filter === "completed" ? "600" : "400"
-                    }}
-                >
-                    Completed
-                </button>
-            </div>
-
-            {loading && <p>Loading tasks…</p>}
-            {error && <p className="error-text">{error}</p>}
-
-            {!loading && !error && tasks.length === 0 && <p>No tasks yet.</p>}
-
-            {totalTasks > 0 && (
-                <p className="task-summary">
-                    <strong>{totalTasks}</strong> tasks ·{" "}
-                    <strong>{completedTasks}</strong> completed
-                </p>
-            )}
-
-            <ul className="task-list">
-                {visibleTasks.map((task) => (
-                    <TaskItem
-                        key={task.id}
-                        task={task}
-                        onToggleComplete={handleToggleComplete}
-                        onDelete={handleDeleteTask}
-                    />
-                ))}
-            </ul>
-
-        </section>
-    );
-}
+      {totalTasks > 0 && (
+        <p className="task-summary">
+          <strong>{totalTasks}</strong> tasks ·{" "}
+          <strong>{completedTasks}</strong> completed
+        </p>
+      )}
+      
+      {loading ? (
+        <Spinner animation="border" />
+      ) : (
+        <ul className="task-list">
+          {visibleTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggleComplete={handleToggleComplete}
+              onDelete={handleDeleteTask}
+            />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
 
 export default TaskList;
