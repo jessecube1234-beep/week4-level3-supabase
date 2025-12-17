@@ -2,6 +2,8 @@
 
 This is a simple task manager app built with React, Vite, and Supabase. It allows you to add, read, update, and delete tasks in a user-friendly way.
 
+Checkout the live demon [here](https://supabase-intro-week4.netlify.app/)
+
 ## Installation
 .env.local example:
 supabase credentials
