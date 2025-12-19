@@ -29,3 +29,11 @@ npm run dev
 
 4. Open your browser and navigate to 'http://localhost:5173' to see the app running
 
+5. For this assignment, I added an additional controlled form to insert new rows into the Supabase `tasks` table.
+
+### Features
+- Controlled React form with validation
+- Inserts a new task using `supabase-js`
+- Prevents submit when the input is empty
+- Displays a error message on failure
+- Automatically updates the previous task list on success
