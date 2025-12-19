@@ -3,6 +3,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import TaskItem from "./TaskItem.jsx";
 import NewTaskForm from "./NewTaskForm.jsx";
 import { useTasks } from "../../hooks/useTasks.js";
+import TaskForm from "./TaskForm.jsx";
+
 
 /**
  * TaskList (Day 4):
@@ -14,7 +16,7 @@ import { useTasks } from "../../hooks/useTasks.js";
 function TaskList() {
   const [filter, setFilter] = useState("all"); // "all" | "active" | "completed"
 
-  const { 
+  const {
     tasks,
     loading,
     error,
@@ -65,7 +67,7 @@ function TaskList() {
   }), [tasks, filter]);
 
   return (
-    <section className="card">
+    <><section className="card">
       <h2 className="color-white">Tasks</h2>
 
       <NewTaskForm onAddTask={handleAddTask} />
@@ -114,7 +116,7 @@ function TaskList() {
           <strong>{completedTasks}</strong> completed
         </p>
       )}
-      
+
       {loading ? (
         <Spinner animation="border" />
       ) : (
@@ -124,12 +126,15 @@ function TaskList() {
               key={task.id}
               task={task}
               onToggleComplete={handleToggleComplete}
-              onDelete={handleDeleteTask}
-            />
+              onDelete={handleDeleteTask} />
           ))}
         </ul>
       )}
-    </section>
+    </section><section className="card mt-4">
+        <h2>Add Task (Assignment Form)</h2>
+
+        <TaskForm addTask={handleAddTask} />
+    </section></>
   );
 };
 
